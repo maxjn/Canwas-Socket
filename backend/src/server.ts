@@ -8,7 +8,7 @@ const app = express();
 
 // Cors Options
 const cors = {
-  origin: process.env.FRONTEND_RUL
+  origin: process.env.FRONTEND_URL
 }
 
 // Express Server
