@@ -17,6 +17,7 @@ const Page: FC<pageProps> = ({}) => {
   useEffect(() => {
     const ctx = canvasRef.current?.getContext("2d");
 
+    // Draw
     socket.on(
       "draw-line",
       ({ prevPoint, currentPoint, color }: DrawLineSocketProps) => {
@@ -24,7 +25,11 @@ const Page: FC<pageProps> = ({}) => {
         drawLine({ prevPoint, currentPoint, ctx, color });
       }
     );
-  }, []);
+
+// Clear
+socket.on('clear',clear)
+
+  }, [canvasRef]);
 
   function createLine({ prevPoint, currentPoint, ctx }: Draw) {
     socket.emit("draw-line", { prevPoint, currentPoint, color });
@@ -38,7 +43,7 @@ const Page: FC<pageProps> = ({}) => {
         <button
           type="button"
           className="p-2 rounded-md border border-black"
-          onClick={clear}
+          onClick={()=>socket.emit('clear')}
         >
           Clear canvas
         </button>
