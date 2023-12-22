@@ -26,10 +26,35 @@ const Page: FC<pageProps> = ({}) => {
       }
     );
 
-// Clear
-socket.on('clear',clear)
+    // Send Data On New Connection
+    socket.emit('client-ready')
 
-  }, [canvasRef]);
+    socket.on('get-canvas-state', () => {
+      if (!canvasRef.current?.toDataURL()) return
+      console.log('sending canvas state')
+      socket.emit('canvas-state', canvasRef.current.toDataURL())
+    })
+
+    socket.on('canvas-state-from-server', (state: string) => {
+      console.log('I received the state')
+      const img = new Image()
+      img.src = state
+      img.onload = () => {
+        ctx?.drawImage(img, 0, 0)
+      }
+    })
+
+    // Clear
+    socket.on("clear", clear);
+
+    // useEffect Clean Up
+    return ()=>{
+      socket.off('clear')
+      socket.off('canvas-state-from-server')
+      socket.off('get-canvas-state')
+      socket.off('draw-line')
+    }
+  }, [canvasRef, socket, clear]);
 
   function createLine({ prevPoint, currentPoint, ctx }: Draw) {
     socket.emit("draw-line", { prevPoint, currentPoint, color });
@@ -43,7 +68,7 @@ socket.on('clear',clear)
         <button
           type="button"
           className="p-2 rounded-md border border-black"
-          onClick={()=>socket.emit('clear')}
+          onClick={() => socket.emit("clear")}
         >
           Clear canvas
         </button>
